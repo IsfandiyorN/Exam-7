@@ -1,4 +1,3 @@
-// ProductPage.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
@@ -8,7 +7,7 @@ const ProductPage = () => {
   const [product, setProduct] = useState(null);
 
   useEffect(() => {
-    axios.get(`https://headphones-server.onrender.com/products/${id}`)
+    axios.get(`${import.meta.env.VITE_BASE_URL}/products/${id}`)
       .then((response) => {
         setProduct(response.data);
       })
@@ -20,10 +19,12 @@ const ProductPage = () => {
   if (!product) return <div>Loading...</div>;
 
   return (
-    <div>
-      <h1>{product.name}</h1>
-      <img src={product.image_url} alt={product.name} />
-      <p>{product.description}</p>
+    <div className="product-detail p-4">
+      <h1 className="text-2xl font-bold">{product.name}</h1>
+      <img src={product.image_url} alt={product.name} className="w-fit h-auto" />
+      <p className="mt-2 text-gray-700">{product.description}</p>
+      <p className="mt-2 font-bold">Price: ${product.price}</p>
+      <h3 className="mt-4 font-bold">Available Colors:</h3>
       <div className="color-options">
         {product.color_options.map((color, index) => (
           <span
@@ -39,7 +40,9 @@ const ProductPage = () => {
             }}
             title={color}
           ></span>
+          
         ))}
+         <button onClick={() => handleAddToCart(product)} className="bg-green-500 text-white p-2 mt-2">Add to Cart</button>
       </div>
     </div>
   );

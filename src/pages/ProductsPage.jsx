@@ -1,100 +1,146 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { fetchProducts} from '../store/productsSlice';
 import { addToCart } from '../store/cartSlice';
 
 const ProductsPage = () => {
-  const products = useSelector((state) => state.products.items);
   const dispatch = useDispatch();
+  const products = useSelector((state) => state.products.items);
+  const [brands, setBrands] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [sortOrder, setSortOrder] = useState('asc');
+  const navigate = useNavigate();
 
-  const [selectedBrand, setSelectedBrand] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
-  const [sortOrder, setSortOrder] = useState('');
-
-  const brands = [...new Set(products.map((product) => product.brand))];
-  const colors = [...new Set(products.map((product) => product.color))];
-
-  const filteredProducts = products
-    .filter((product) => {
-      return (
-        (selectedBrand ? product.brand === selectedBrand : true) &&
-        (selectedColor ? product.color === selectedColor : true)
-      );
-    })
-    .sort((a, b) => {
-      if (sortOrder === 'asc') return a.price - b.price;
-      if (sortOrder === 'desc') return b.price - a.price;
-      return 0;
+  useEffect(() => {
+    dispatch(fetchProducts());
+    axios.get(`${import.meta.env.VITE_BASE_URL}/brands`).then(response => setBrands(response.data));
+    axios.get(`${import.meta.env.VITE_BASE_URL}/colors`).then(response => setColors(response.data));
+    axios.get(`${import.meta.env.VITE_BASE_URL}/products`).then(response => {
+      console.log('Fetched Products:', response.data); // Debugging log
+      dispatch(setProducts(response.data));
     });
+  }, [dispatch]);
+
+  const handleBrandChange = (brand) => {
+    console.log('Brand clicked:', brand); // Debugging log
+    setSelectedBrands(prev =>
+      prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+    );
+  };
+
+  const handleColorChange = (color) => {
+    setSelectedColors(prev =>
+      prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
+    );
+  };
+
+  const handleResetFilters = () => {
+    setSelectedBrands([]);
+    setSelectedColors([]);
+  };
 
   const handleAddToCart = (product) => {
     dispatch(addToCart(product));
   };
 
+  const sortedProducts = [...products].sort((a, b) => {
+    if (sortOrder === 'asc') {
+      return a.price - b.price;
+    } else {
+      return b.price - a.price;
+    }
+  });
+
+  const filteredProducts = sortedProducts.filter(product => {
+    console.log('Product:', product); // Debugging log
+    console.log('Product brand:', product.brand); // Debugging log
+    console.log('Selected Brands for filtering:', selectedBrands); // Debugging log
+
+    return (
+      (selectedBrands.length === 0 || selectedBrands.includes(product.brand)) &&
+      (selectedColors.length === 0 || product.color_options.some(color => selectedColors.includes(color)))
+    );
+  });
+
+  console.log("Selected Brands:", selectedBrands); // Debugging log
+  console.log("Selected Colors:", selectedColors); // Debugging log
+  console.log("Filtered Products:", filteredProducts); // Debugging log
+
   return (
-    <div className="flex">
-      <aside className="w-1/4 p-4">
-        <div>
-          <h3 className="font-bold">Brand</h3>
-          <select onChange={(e) => setSelectedBrand(e.target.value)} value={selectedBrand}>
-            <option value="">All</option>
-            {brands.map((brand) => (
-              <option key={brand} value={brand}>
-                {brand}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mt-4">
-          <h3 className="font-bold">Color</h3>
-          <select onChange={(e) => setSelectedColor(e.target.value)} value={selectedColor}>
-            <option value="">All</option>
-            {colors.map((color) => (
-              <option key={color} value={color}>
-                {color}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mt-4">
-          <h3 className="font-bold">Sort by Price</h3>
-          <select onChange={(e) => setSortOrder(e.target.value)} value={sortOrder}>
-            <option value="">None</option>
-            <option value="asc">Low to High</option>
-            <option value="desc">High to Low</option>
-          </select>
-        </div>
-      </aside>
-      <div className="flex-1 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="border p-4 rounded">
-              <img src={product.image_url} alt={product.name} className="w-full h-48 object-cover" />
-              <h2 className="text-lg font-bold">{product.name}</h2>
-              <p className="text-gray-600">{product.description}</p>
-              <div className="flex gap-3  ">
-        {product.color_options.map((c, index) => {
-          return (
-            <span
-              key={index}
-              style={{ backgroundColor: c }}
-              className=" w-8 h-8 rounded-full border border-black "
-            ></span>
-          );
-        })}
-      </div>
-              <p>${product.price}</p>
-              <button
-                onClick={() => handleAddToCart(product)}
-                className="mt-2 bg-green-500 text-white p-2 rounded"
-              >
-                Add to Cart
-              </button>
-              <div>
-            
-          </div>
-            </div>
+    <div className="products-page flex">
+      <aside className='w-40'>
+        <h2>Brands</h2>
+        <ul>
+          {brands.map((brand, index) => (
+            <li key={index}>
+              <input
+                type="checkbox"
+                value={brand}
+                name="brand"
+                id={brand}
+                checked={selectedBrands.includes(brand)}
+                onChange={() => handleBrandChange(brand)}
+              />
+              <label htmlFor={brand}>{brand}</label>
+            </li>
           ))}
-        </div>
+        </ul>
+        <h2>Colors</h2>
+        {colors.map((color, index) => (
+          <span
+            key={index}
+            onClick={() => handleColorChange(color)}
+            style={{
+              display: 'inline-block',
+              width: '20px',
+              height: '20px',
+              backgroundColor: color,
+              marginRight: '5px',
+              borderRadius: '50%',
+              border: '1px solid #000',
+              cursor: 'pointer'
+            }}
+            title={color}
+          ></span>
+        ))}
+        <h2>Sort by Price</h2>
+        <select onChange={(e) => setSortOrder(e.target.value)} value={sortOrder}>
+          <option value="asc">Low to High</option>
+          <option value="desc">High to Low</option>
+        </select>
+        <button className='text-green-500' onClick={handleResetFilters}>Reset</button>
+      </aside>
+      <div className='w-fit flex flex-wrap'>
+        {filteredProducts.map((product) => (
+          <div key={product.id} className="product m-auto">
+            <img src={product.image_url} alt={product.name} />
+            <h2 onClick={() => navigate(`/product/${product.id}`)} className="cursor-pointer">{product.name}</h2>
+            <p>{product.description}</p>
+            <p>Price: ${product.price}</p>
+            <div className="color-options">
+              {product.color_options.map((color, index) => (
+                <span
+                  key={index}
+                  style={{
+                    display: 'inline-block',
+                    width: '20px',
+                    height: '20px',
+                    backgroundColor: color,
+                    marginRight: '5px',
+                    borderRadius: '50%',
+                    border: '1px solid #000',
+                  }}
+                  title={color}
+                ></span>
+              ))}
+            </div>
+            <button onClick={() => handleAddToCart(product)} className="bg-green-500 text-white p-2 mt-2">Add to Cart</button>
+          </div>
+        ))}
       </div>
     </div>
   );
