@@ -7,7 +7,7 @@ import { addToCart } from '../store/cartSlice';
 
 const ProductsPage = () => {
   const dispatch = useDispatch();
-  const products = useSelector((state) => state.products.items);
+  const [products, setProducts] = useState([]);
   const [brands, setBrands] = useState([]);
   const [colors, setColors] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
@@ -20,13 +20,13 @@ const ProductsPage = () => {
     axios.get(`${import.meta.env.VITE_BASE_URL}/brands`).then(response => setBrands(response.data));
     axios.get(`${import.meta.env.VITE_BASE_URL}/colors`).then(response => setColors(response.data));
     axios.get(`${import.meta.env.VITE_BASE_URL}/products`).then(response => {
-      console.log('Fetched Products:', response.data); // Debugging log
+      console.log('Fetched Products:', response.data); 
       dispatch(setProducts(response.data));
     });
   }, [dispatch]);
 
   const handleBrandChange = (brand) => {
-    console.log('Brand clicked:', brand); // Debugging log
+    console.log('Brand clicked:', brand); 
     setSelectedBrands(prev =>
       prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
     );
@@ -56,19 +56,19 @@ const ProductsPage = () => {
   });
 
   const filteredProducts = sortedProducts.filter(product => {
-    console.log('Product:', product); // Debugging log
-    console.log('Product brand:', product.brand); // Debugging log
-    console.log('Selected Brands for filtering:', selectedBrands); // Debugging log
+    console.log('Product:', product); 
+    console.log('Product brand:', product.brand_name); 
+    console.log('Selected Brands for filtering:', selectedBrands); 
 
     return (
-      (selectedBrands.length === 0 || selectedBrands.includes(product.brand)) &&
+      (selectedBrands.length === 0 || selectedBrands.includes(product.brand_name)) &&
       (selectedColors.length === 0 || product.color_options.some(color => selectedColors.includes(color)))
     );
   });
 
-  console.log("Selected Brands:", selectedBrands); // Debugging log
-  console.log("Selected Colors:", selectedColors); // Debugging log
-  console.log("Filtered Products:", filteredProducts); // Debugging log
+  console.log("Selected Brands:", selectedBrands); 
+  console.log("Selected Colors:", selectedColors); 
+  console.log("Filtered Products:", filteredProducts); 
 
   return (
     <div className="products-page flex">
@@ -102,7 +102,7 @@ const ProductsPage = () => {
               marginRight: '5px',
               borderRadius: '50%',
               border: '1px solid #000',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
             title={color}
           ></span>
@@ -112,13 +112,13 @@ const ProductsPage = () => {
           <option value="asc">Low to High</option>
           <option value="desc">High to Low</option>
         </select>
-        <button className='text-green-500' onClick={handleResetFilters}>Reset</button>
+        <button className='text-green-500 border border-solid border-[green-500]' onClick={handleResetFilters}>Reset</button>
       </aside>
       <div className='w-fit flex flex-wrap'>
         {filteredProducts.map((product) => (
           <div key={product.id} className="product m-auto">
             <img src={product.image_url} alt={product.name} />
-            <h2 onClick={() => navigate(`/product/${product.id}`)} className="cursor-pointer">{product.name}</h2>
+            <h2 onClick={() => navigate(`/product/${product.id}`)} className="cursor-pointer text-[#190D26] text-xl not-italic font-normal leading-[normal]">{product.name}</h2>
             <p>{product.description}</p>
             <p>Price: ${product.price}</p>
             <div className="color-options">

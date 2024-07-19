@@ -6,9 +6,15 @@ const Header = () => {
   const cart = useSelector((state) => state.cart);
   return (
     <header className="bg-green-500 text-white p-4">
-      <div className="container mx-auto flex justify-between items-center">
+      <div className=" container mx-auto flex justify-between items-center">
         <Link to="/" className="text-2xl font-bold">GameGeek</Link>
-        
+        <div className='w-2/4 flex mx-auto justify-around'>
+        <Link to="/" className='text-white text-base not-italic font-medium leading-[normal] transition-[0.2s] hover: scale-110'>Categories</Link>
+        <Link to="/" className='text-white text-base not-italic font-medium leading-[normal] transition-[0.2s] hover: scale-110'>Brands</Link>
+        <Link to="/" className='text-white text-base not-italic font-medium leading-[normal] transition-[0.2s] hover: scale-110'>What's new</Link>
+        <Link to="/" className='text-white text-base not-italic font-medium leading-[normal] transition-[0.2s] hover: scale-110'>Help</Link>
+        <Link to="/" className='text-white text-base not-italic font-medium leading-[normal] transition-[0.2s] hover: scale-110'>About</Link>
+        </div>
         <Link to="/cart" className="relative">
           <div class="flex justify-center items-center">
     <div class="relative py-2">

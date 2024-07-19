@@ -12,7 +12,8 @@ const CartPage = () => {
       {cart.items.length === 0 ? (
         <div>Your cart is empty.</div>
       ) : (
-        <div>
+        <div className='flex'>
+          <div className='w-1/2'>
           <ul>
             {cart.items.map((item) => (
               <li key={item.id} className="flex justify-between items-center mb-4">
@@ -29,7 +30,8 @@ const CartPage = () => {
               </li>
             ))}
           </ul>
-          <div className="mt-4">Total: ${cart.totalPrice}</div>
+        </div>
+          <div className="mt-36 ml-52">Total: ${cart.totalPrice}</div>
         </div>
       )}
     </div>
